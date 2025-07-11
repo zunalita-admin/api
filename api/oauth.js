@@ -1,39 +1,56 @@
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "https://zunalita.github.io");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { code } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: "Missing code" });
+  }
+
   const client_id = process.env.GITHUB_CLIENT_ID;
   const client_secret = process.env.GITHUB_CLIENT_SECRET;
 
-  const code = req.query.code;
-
-  if (!code) {
-    return res.status(400).json({ error: "Missing OAuth code" });
+  if (!client_id || !client_secret) {
+    return res.status(500).json({ error: "Server misconfigured" });
   }
 
   try {
-    // Change code to access token
-    const tokenResponse = await fetch(
-      `https://github.com/login/oauth/access_token`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          client_id,
-          client_secret,
-          code
-        })
-      }
-    );
+    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        client_id,
+        client_secret,
+        code,
+      }),
+    });
 
-    const tokenData = await tokenResponse.json();
-
-    if (!tokenData.access_token) {
-      return res.status(500).json({ error: "Failed to get token", details: tokenData });
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text();
+      throw new Error(`GitHub responded: ${errText}`);
     }
 
-    // Return to front-end
-    res.setHeader("Cache-Control", "no-store");
-    res.status(200).json({ token: tokenData.access_token });
+    const data = await tokenRes.json();
+
+    if (data.error) {
+      return res.status(400).json({ error: data.error_description || data.error });
+    }
+
+    const access_token = data.access_token;
+
+    res.status(200).json({ token: access_token });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Unexpected error", details: err.message });
+    res.status(500).json({ error: "OAuth exchange failed" });
   }
 }
