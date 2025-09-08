@@ -10,20 +10,20 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: "method not allowed" });
   }
 
   const { token } = req.body;
 
   if (!token) {
-    return res.status(400).json({ error: "Missing token" });
+    return res.status(400).json({ error: "missing token" });
   }
 
   const client_id = process.env.GITHUB_CLIENT_ID;
   const client_secret = process.env.GITHUB_CLIENT_SECRET;
 
   if (!client_id || !client_secret) {
-    return res.status(500).json({ error: "Server misconfigured" });
+    return res.status(500).json({ error: "server misconfigured" });
   }
 
   try {
@@ -42,12 +42,12 @@ export default async function handler(req, res) {
 
     if (!tokenRevocationRes.ok) {
       const errText = await tokenRevocationRes.text();
-      throw new Error(`GitHub responded with an error during token revocation: ${errText}`);
+      throw new Error(`gitHub responded with an error during token revocation: ${errText}`);
     }
 
-    res.status(200).json({ message: "Token revoked successfully" });
+    res.status(200).json({ message: "token revoked successfully" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Token revocation failed" });
+    res.status(500).json({ error: "token revocation failed" });
   }
 }
