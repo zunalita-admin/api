@@ -1,4 +1,6 @@
 export default async function handler(req, res) {
+  // Testing time!
+  res.setHeader("Access-Control-Allow-Origin", "*");
   // Set CORS headers for the same origin as the other route
   res.setHeader("Access-Control-Allow-Origin", "https://zunalita.github.io");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
