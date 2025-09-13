@@ -1,9 +1,9 @@
 // Revoking oauth user tokens for more security at Zunalita!
 export default async function handler(req, res) {
-  // Set CORS headers for the same origin as the other route
+  // Set CORS headers
   res.setHeader("Access-Control-Allow-Origin", "https://zunalita.github.io");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Added Authorization header
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   if (req.method === "OPTIONS") {
     return res.status(204).end();
@@ -17,6 +17,12 @@ export default async function handler(req, res) {
 
   if (!token) {
     return res.status(400).json({ error: "missing token" });
+  }
+
+  // --- Prefix check (quick validation) ---
+  const validPrefixes = ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"];
+  if (!validPrefixes.some(prefix => token.startsWith(prefix))) {
+    return res.status(400).json({ error: "invalid token format" });
   }
 
   const client_id = process.env.GITHUB_CLIENT_ID;
