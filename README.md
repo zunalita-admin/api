@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **Zunalita is currently on pause.**
+>
+> Development is expected to resume in **2028**.
+> The source code remains available at **https://github.com/zunalita/zunalita.github.io**.
+
 # Zunalita API — Vercel serverless functions for Zunalita Blog
 
 ![Vercel](https://vercelbadge.vercel.app/api/zunalita-admin/api) 
